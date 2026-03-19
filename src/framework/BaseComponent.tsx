@@ -1,7 +1,19 @@
 import React from 'react';
-import { useQuery, useMutation } from '../hooks';
+import { useList, useEntity, useDispatch } from '../hooks';
 import { CanvasContainer } from './CanvasContainer';
 import { BaseComponentProps } from './types';
+
+// Internal wrapper to fetch entity using hooks cleanly without breaking hook rules
+function EntityDataFetcher<T extends { _isFull?: boolean }>({ collection, id, children }: { collection: string, id: string, children: (data: T | null, loading: boolean, error: any) => React.ReactNode }) {
+  const { data, loading, error } = useEntity<T>(collection, id);
+  return <>{children(data, loading, error)}</>;
+}
+
+// Internal wrapper to fetch list using hooks cleanly
+function ListDataFetcher<T>({ collection, query, children }: { collection: string, query: any, children: (data: T[], loading: boolean, error: any) => React.ReactNode }) {
+  const { data, loading, error } = useList<T>(collection, query);
+  return <>{children(data, loading, error)}</>;
+}
 
 export function BaseComponent<T = any>({
   collection,
@@ -9,53 +21,49 @@ export function BaseComponent<T = any>({
   query,
   children,
   ...canvasProps
-}: BaseComponentProps & { children: (props: { data: T | T[], actions: any }) => React.ReactNode }) {
+}: BaseComponentProps & { children: (props: { data: any, actions: any }) => React.ReactNode }) {
   
-  // 1. Data Binding
-  // TODO: Optimize this. Currently useQuery fetches all and we filter.
-  // Ideally useQuery should support RxDB queries directly.
-  const { data: allData, loading, error } = useQuery<T>(collection);
-  const { add, update, remove } = useMutation<T>(collection);
+  const { dispatch } = useDispatch(collection);
 
-  let finalData: T | T[] | null = null;
-
-  if (loading) return null; // Or a skeleton?
-  if (error) return <div>Error: {error.message}</div>;
-
-  if (id) {
-    // Single Entity Mode
-    finalData = (allData as any[]).find((d: any) => d.id === id) || null;
-    
-    if (!finalData) {
-      // Data missing in Local DB. 
-      // In a real app, this triggers a fetch to the backend.
-      // For now, we show a loading state.
-      console.log(`[BaseComponent] Data ${collection}:${id} missing. Waiting for sync...`);
-      return <div className="agent-f-loading">Loading {collection}:{id}...</div>;
-    }
-  } else {
-    // List Mode
-    // TODO: Implement actual query filtering here if needed
-    finalData = allData;
-  }
-
-  // 2. Action System (Restricted)
+  // Map legacy actions to the new CQRS intent tunnel
   const actions = {
-    add,
-    update,
-    remove,
+    add: (payload: any) => dispatch('create', null, payload),
+    update: (targetId: string, payload: any) => dispatch('update', targetId, payload),
+    remove: (targetId: string) => dispatch('delete', targetId),
     navigate: canvasProps.navigate || (() => console.warn('Navigate not implemented')),
     refresh: () => {
-      console.log(`[Agent F] Refreshing data for ${collection}:${id || JSON.stringify(query)}`);
-      // In a real app, this would trigger the Sync Engine to fetch latest data from backend
+      console.log(`[Agent K] Refreshing data for ${collection}:${id || JSON.stringify(query)}`);
       // syncEngine.pull(collection, id);
     }
   };
 
-  // 3. Canvas Positioning
-  return (
-    <CanvasContainer {...canvasProps}>
-      {children({ data: finalData, actions })}
-    </CanvasContainer>
-  );
+  const renderContent = (data: any, loading: boolean, error: any) => {
+    if (loading) return null; // Or a skeleton?
+    if (error) return <div>Error: {error.message}</div>;
+
+    if (id && !data) {
+      console.log(`[BaseComponent] Data ${collection}:${id} missing. Waiting for sync...`);
+      return <div className="agent-k-loading">Loading {collection}:{id}...</div>;
+    }
+
+    return (
+      <CanvasContainer {...canvasProps}>
+        {children({ data, actions })}
+      </CanvasContainer>
+    );
+  };
+
+  if (id) {
+    return (
+      <EntityDataFetcher<any> collection={collection} id={id}>
+        {renderContent}
+      </EntityDataFetcher>
+    );
+  } else {
+    return (
+      <ListDataFetcher<T> collection={collection} query={query}>
+        {renderContent}
+      </ListDataFetcher>
+    );
+  }
 }

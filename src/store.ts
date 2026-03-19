@@ -36,7 +36,7 @@ export class Store {
     }
   }
 
-  async init(name: string = 'agent_f_db', storage?: any) {
+  async init(name: string = 'agent_k_db', storage?: any) {
     if (this.db) return this.db;
 
     this.db = await createRxDatabase({
@@ -59,7 +59,7 @@ export class Store {
 
 // Global singleton pattern to survive HMR
 const globalScope = typeof window !== 'undefined' ? window : global;
-const SYMBOL_KEY = Symbol.for('agent-f.store');
+const SYMBOL_KEY = Symbol.for('agent-k.store');
 
 if (!(globalScope as any)[SYMBOL_KEY]) {
   (globalScope as any)[SYMBOL_KEY] = new Store();

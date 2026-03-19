@@ -43,7 +43,7 @@ function resolveId(bindingId: z.infer<typeof BindingSourceSchema> | undefined, c
 
 export const Renderer: React.FC<RendererProps> = ({ page, components, context }) => {
   return (
-    <div className="agent-f-page" style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="agent-k-page" style={{ position: 'relative', width: '100%', height: '100%' }}>
       {page.components.map((instance: ComponentInstance) => {
         const Component = components[instance.type];
         

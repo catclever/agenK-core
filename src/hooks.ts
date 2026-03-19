@@ -4,7 +4,7 @@ import { RxDocument } from 'rxdb';
 
 /**
  * 1. useList (List Strategy)
- * Resolves multiple documents based on a query. In the Agent F architecture,
+ * Resolves multiple documents based on a query. In the Agent K architecture,
  * list queries inherently assume Snippet data.
  */
 export function useList<T>(collectionName: string, queryObj: any = {}) {
@@ -78,14 +78,14 @@ export function useEntity<T extends { _isFull?: boolean }>(collectionName: strin
             
             // Content-First Sync Rule: If only snippet exists, fetch full entity
             if (doc.get('_isFull') === false) {
-              console.warn(`[Agent F Sync] Snippet detected for ${collectionName}:${id}. Initiating background fetch for full data from Amber Backend...`);
+              console.warn(`[Agent K Sync] Snippet detected for ${collectionName}:${id}. Initiating background fetch for full data from Amber Backend...`);
               // TODO: Wire to actual Backend REST/GraphQL call
             }
           } else {
             setData(null);
             setLoading(false);
             // Document missing trigger
-            console.warn(`[Agent F Sync] Document ${collectionName}:${id} not found locally. Initiating forced fetch from Amber Backend...`);
+            console.warn(`[Agent K Sync] Document ${collectionName}:${id} not found locally. Initiating forced fetch from Amber Backend...`);
           }
         });
       } catch (err) {
