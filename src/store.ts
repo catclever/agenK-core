@@ -66,6 +66,6 @@ if (!(globalScope as any)[SYMBOL_KEY]) {
 }
 
 // Expose for interceptors/debugging
-(globalScope as any).__AGENT_F_STORE__ = (globalScope as any)[SYMBOL_KEY];
+(globalScope as any).__AGENT_K_STORE__ = (globalScope as any)[SYMBOL_KEY];
 
 export const store = (globalScope as any)[SYMBOL_KEY] as Store;
