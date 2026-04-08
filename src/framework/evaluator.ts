@@ -65,7 +65,7 @@ export function bindProps(props: any, bindings: any): any {
     } else if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
       resolved[k] = bindProps(v, bindings);
     } else if (Array.isArray(v)) {
-      resolved[k] = v.map(item => typeof item === 'object' ? bindProps(item, bindings) : item);
+      resolved[k] = v.map(item => typeof item === 'object' ? bindProps(item, bindings) : (typeof item === 'string' && item.startsWith('$state.') ? resolvePath(item.slice(7), bindings.state) : item));
     } else {
       resolved[k] = v;
     }
