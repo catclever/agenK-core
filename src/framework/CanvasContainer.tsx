@@ -1,26 +1,34 @@
 import React from 'react';
-import { CanvasProps } from './types';
+import type { CanvasProps } from './types';
 
 export const CanvasContainer: React.FC<CanvasProps> = ({
-  x = 0,
-  y = 0,
+  x,
+  y,
   scale = 1,
   rotation = 0,
   opacity = 1,
   zIndex = 0,
   width = 'auto',
   height = 'auto',
+  className = '',
   children,
-  className,
   style,
   onClick
 }) => {
-  const containerStyle: React.CSSProperties = {
+  const isAbsolute = x !== undefined || y !== undefined;
+  
+  const containerStyle: React.CSSProperties = isAbsolute ? {
     position: 'absolute',
-    left: x,
-    top: y,
+    left: x || 0,
+    top: y || 0,
     transform: `scale(${scale}) rotate(${rotation}deg)`,
-    transformOrigin: '0 0', // Align to top-left as requested
+    transformOrigin: '0 0',
+    opacity,
+    zIndex,
+    width,
+    height,
+    ...style
+  } : {
     opacity,
     zIndex,
     width,

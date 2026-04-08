@@ -1,7 +1,7 @@
-import { createRxDatabase, RxDatabase, addRxPlugin } from 'rxdb';
+import { createRxDatabase, type RxDatabase, addRxPlugin } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import { SchemaDefinition, toRxSchema } from './schema';
-import { ZodTypeAny } from 'zod';
+import { type SchemaDefinition, toRxSchema } from './schema';
+import type { ZodTypeAny } from 'zod';
 
 // Add plugins
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
@@ -58,7 +58,7 @@ export class Store {
 }
 
 // Global singleton pattern to survive HMR
-const globalScope = typeof window !== 'undefined' ? window : global;
+const globalScope = typeof window !== 'undefined' ? window : globalThis;
 const SYMBOL_KEY = Symbol.for('agent-k.store');
 
 if (!(globalScope as any)[SYMBOL_KEY]) {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { RxJsonSchema } from 'rxdb';
+import type { RxJsonSchema } from 'rxdb';
 
 export interface SchemaDefinition<T extends z.ZodTypeAny> {
   name: string;

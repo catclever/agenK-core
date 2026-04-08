@@ -1,7 +1,7 @@
 import React from 'react';
 import { useList, useEntity, useDispatch } from '../hooks';
 import { CanvasContainer } from './CanvasContainer';
-import { BaseComponentProps } from './types';
+import type { BaseComponentProps } from './types';
 
 // Internal wrapper to fetch entity using hooks cleanly without breaking hook rules
 function EntityDataFetcher<T extends { _isFull?: boolean }>({ collection, id, children }: { collection: string, id: string, children: (data: T | null, loading: boolean, error: any) => React.ReactNode }) {
@@ -21,8 +21,17 @@ export function BaseComponent<T = any>({
   query,
   children,
   ...canvasProps
-}: BaseComponentProps & { children: (props: { data: any, actions: any }) => React.ReactNode }) {
-  
+}: BaseComponentProps & { children: (props: { data?: any, actions?: any }) => React.ReactNode }) {
+
+  // If no collection is provided, render purely visual/structural components
+  if (!collection) {
+    return (
+      <CanvasContainer {...canvasProps}>
+        {children({ data: null, actions: {} })}
+      </CanvasContainer>
+    );
+  }
+
   const { dispatch } = useDispatch(collection);
 
   // Map legacy actions to the new CQRS intent tunnel

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { store } from './store';
-import { RxDocument } from 'rxdb';
+import type { RxDocument } from 'rxdb';
 
 /**
  * 1. useList (List Strategy)
