@@ -1,4 +1,4 @@
-import { createRxDatabase, type RxDatabase, addRxPlugin } from 'rxdb';
+import { createRxDatabase, type RxDatabase, addRxPlugin, removeRxDatabase } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { type SchemaDefinition, toRxSchema } from './schema';
 import type { ZodTypeAny } from 'zod';
@@ -54,6 +54,26 @@ export class Store {
 
     await this.db.addCollections(collections);
     return this.db;
+  }
+
+  /**
+   * Resets the entire local database. 
+   * Extremely useful for debugging, handling schema collisions, or wiping user data during tests.
+   */
+  async reset(name: string = 'agent_k_db', storage?: any) {
+    // 1. Destroy running instance from memory
+    if (this.db) {
+      await this.db.destroy();
+      this.db = null;
+    }
+    
+    // 2. Erase the physical local storage completely
+    await removeRxDatabase(name, storage || getRxStorageDexie());
+    console.warn(`[Agent K DB] Physical database storage for '${name}' has been wiped.`);
+    
+    // 3. (Optional) Could clear schemas here, but typically we want to preserve 
+    // the registered schemas so that an immediate re-init brings them back.
+    // this.schemas = []; 
   }
 }
 
